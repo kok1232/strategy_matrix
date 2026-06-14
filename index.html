@@ -1,0 +1,935 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="manifest" href="manifest.json">
+    <meta name="mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="default">
+    <meta name="apple-mobile-web-app-title" content="策略矩陣">
+    <link rel="apple-touch-icon" href="icons/icon-192x192.png">
+    <meta name="theme-color" content="#2c3e50">
+    <title>國立東華大學EMBA 高階經營管理碩士班 - 策略矩陣線上工具 V8.0</title>
+    <style>
+        :root {
+            --primary-color: #2c3e50;
+            --primary-light: #eaedf1;
+            --node-selected-bg: #6a1b9a;
+            --node-active-border: #f1c40f; 
+            --path-single-color: #1e88e5;  
+            --product-color: #d35400;
+            --product-light: #fdf2e9;
+            --border-color: #ced4da;
+            --text-color: #2c3e50;
+            --bg-color: #f8f9fa;
+            --card-bg: #ffffff;
+        }
+
+        * {
+            box-sizing: border-box;
+            font-family: "Helvetica Neue", Helvetica, Arial, "PingFang TC", "Microsoft JhengHei", sans-serif;
+            -webkit-touch-callout: none;
+            -webkit-user-select: none;
+            user-select: none;
+        }
+
+        body {
+            margin: 0;
+            padding: 15px;
+            background-color: var(--bg-color);
+            color: var(--text-color);
+            line-height: 1.5;
+        }
+
+        .container {
+            max-width: 1600px;
+            margin: 0 auto;
+            background: var(--card-bg);
+            padding: 20px;
+            border-radius: 12px;
+            box-shadow: 0 4px 20px rgba(0,0,0,0.08);
+            position: relative;
+        }
+
+        header {
+            text-align: center;
+            margin-bottom: 15px;
+            border-bottom: 2px solid var(--primary-light);
+            padding-bottom: 12px;
+        }
+
+        header .emba-title {
+            color: #7b1fa2;
+            font-size: 18px;
+            font-weight: bold;
+            letter-spacing: 2px;
+            margin-bottom: 6px;
+        }
+
+        header h1 {
+            color: var(--primary-color);
+            margin: 0 0 5px 0;
+            font-size: 24px;
+        }
+
+        /* 移至上方的使用說明區塊樣式 */
+        .instruction-panel {
+            background: #fdfefe;
+            border: 1px solid #d4e6f1;
+            border-radius: 8px;
+            padding: 18px;
+            border-left: 4px solid #1f618d;
+            margin-bottom: 20px;
+        }
+
+        .instruction-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+            gap: 15px;
+            margin-top: 10px;
+        }
+
+        .instruction-step {
+            background: #fff;
+            border: 1px solid #e5e8e8;
+            border-radius: 6px;
+            padding: 12px;
+            font-size: 13px;
+            color: #566573;
+        }
+
+        .instruction-step strong {
+            color: #1f618d;
+            display: block;
+            margin-bottom: 4px;
+            font-size: 14px;
+        }
+
+        .control-panel {
+            background: #fff;
+            padding: 12px;
+            border-radius: 8px;
+            margin-bottom: 15px;
+            border: 1px solid var(--border-color);
+            display: flex;
+            flex-wrap: wrap;
+            gap: 15px;
+            align-items: center;
+        }
+
+        .control-group {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            background: #f1f3f5;
+            padding: 8px 12px;
+            border-radius: 6px;
+        }
+
+        .control-group.product-group {
+            background: var(--product-light);
+        }
+
+        label {
+            font-weight: bold;
+            font-size: 14px;
+        }
+
+        button {
+            padding: 8px 14px;
+            border: 1px solid #ccc;
+            border-radius: 6px;
+            font-size: 14px;
+            cursor: pointer;
+            font-weight: bold;
+            background: #fff;
+            transition: all 0.2s;
+        }
+
+        button:hover {
+            background: #e9ecef;
+        }
+
+        .btn-danger {
+            background-color: #e74c3c;
+            color: white;
+            border: none;
+        }
+        .btn-danger:hover {
+            background-color: #c0392b;
+        }
+
+        .matrix-layout {
+            display: flex;
+            min-width: 1200px;
+            position: relative;
+            border: 1px solid var(--border-color);
+            border-radius: 8px;
+            background: white;
+            overflow: hidden;
+            margin-bottom: 20px;
+        }
+
+        .matrix-table-container {
+            flex: 1;
+            position: relative;
+            overflow-x: auto;
+            -webkit-overflow-scrolling: touch;
+        }
+
+        .svg-canvas {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            pointer-events: none;
+            z-index: 10;
+        }
+
+        table.matrix-table {
+            width: 100%;
+            border-collapse: collapse;
+            table-layout: fixed;
+            position: relative;
+            z-index: 2;
+        }
+
+        table.matrix-table tr:first-child th { border-top: none; }
+        table.matrix-table tr:last-child td { border-bottom: none; }
+        table.matrix-table tr td:first-child, table.matrix-table tr th:first-child { border-left: none; }
+
+        table.matrix-table th, table.matrix-table td {
+            border: 1px solid var(--border-color);
+            text-align: center;
+            padding: 16px 6px;
+            vertical-align: middle;
+        }
+
+        table.matrix-table th {
+            background-color: #f8f9fa;
+            font-weight: bold;
+            font-size: 14px;
+            height: 74px; 
+        }
+
+        table.matrix-table th.axis-label, table.matrix-table td.axis-label {
+            background-color: var(--primary-light);
+            color: var(--primary-color);
+            width: 50px;
+            font-weight: bold;
+        }
+
+        table.matrix-table th.divider-cell, table.matrix-table td.divider-cell {
+            width: 25px;
+            background-color: #f1f3f5;
+            border-left: 2px solid #dee2e6;
+            border-right: 2px solid #dee2e6;
+            padding: 0;
+        }
+
+        .v-header-cell {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            min-height: 40px;
+        }
+        .v-header-cell input {
+            width: 100%;
+            text-align: center;
+            border: 1px transparent;
+            background: transparent;
+            padding: 6px 4px;
+            font-size: 14px;
+            font-weight: bold;
+            color: var(--primary-color);
+            border-bottom: 1px dashed #999;
+            -webkit-user-select: auto;
+            user-select: auto;
+        }
+        .v-header-cell input:focus {
+            border: 1px solid #495057;
+            background: white;
+            outline: none;
+            border-radius: 4px;
+        }
+
+        table.matrix-table th.product-header {
+            background-color: var(--product-light);
+        }
+
+        table.matrix-table tbody tr {
+            height: 76px; 
+        }
+
+        .cell-node {
+            display: inline-flex;
+            justify-content: center;
+            align-items: center;
+            width: 70px; 
+            height: 42px;
+            border-radius: 6px;
+            background-color: #fff;
+            border: 1px solid #adb5bd;
+            font-size: 12px;
+            font-weight: bold;
+            color: #495057;
+            cursor: pointer;
+            transition: all 0.15s;
+            position: relative;
+            z-index: 5;
+        }
+
+        .cell-node.product-node {
+            border-color: #e67e22;
+            color: #d35400;
+        }
+
+        .cell-node.connected {
+            background-color: var(--node-selected-bg) !important;
+            color: white !important;
+            border-color: var(--node-selected-bg) !important;
+            box-shadow: 0 2px 6px rgba(106,27,154,0.3);
+        }
+
+        .cell-node.active-source {
+            outline: 4px solid var(--node-active-border);
+            outline-offset: 1px;
+            animation: pulse 1.5s infinite;
+        }
+
+        @keyframes pulse {
+            0% { outline-color: rgba(241, 196, 15, 1); }
+            50% { outline-color: rgba(241, 196, 15, 0.4); }
+            100% { outline-color: rgba(241, 196, 15, 1); }
+        }
+
+        .dimension-side-panel {
+            width: 320px; 
+            border-left: 1px solid var(--border-color);
+            background: #fafafa;
+            display: flex;
+            flex-direction: column;
+        }
+
+        .side-panel-header {
+            height: 74px; 
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 0 12px;
+            background-color: #f8f9fa;
+            border-bottom: 1px solid var(--border-color);
+        }
+
+        .side-panel-title {
+            width: 100%;
+            text-align: center;
+            font-weight: bold;
+            color: white;
+            background: var(--primary-color);
+            padding: 8px 10px;
+            border-radius: 4px;
+            font-size: 14px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.05);
+        }
+
+        .side-panel-body {
+            display: flex;
+            flex-direction: column;
+        }
+
+        .dimension-item {
+            background: white;
+            border-bottom: 1px solid var(--border-color);
+            padding: 8px 15px; 
+            font-size: 12px;
+            height: 76px; 
+            display: flex;
+            flex-direction: column;
+            justify-content: center; 
+            align-items: center;    
+            text-align: center;     
+            transition: background-color 0.2s;
+        }
+
+        .dimension-item:hover {
+            background-color: #fffbf5; 
+        }
+
+        .dimension-item:last-child {
+            border-bottom: none; 
+        }
+
+        .dimension-item strong {
+            color: var(--node-selected-bg);
+            display: inline-block;
+            margin-bottom: 4px;
+            font-size: 13px;
+            font-weight: bold;
+            background: #f3e5f5; 
+            padding: 2px 8px;
+            border-radius: 4px;
+            border: 1px solid #e1bee7;
+        }
+
+        .dimension-item span {
+            color: #555;
+            font-weight: 500;
+        }
+
+        .strategy-path {
+            fill: none;
+            stroke-width: 3.5;
+            stroke: var(--path-single-color);
+            stroke-dasharray: 6 4;
+        }
+
+        .info-panel {
+            background: #fff;
+            border: 1px solid var(--border-color);
+            border-radius: 8px;
+            padding: 18px;
+        }
+
+        .info-title-box {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            margin-bottom: 12px;
+        }
+
+        .target-icon {
+            background: var(--node-selected-bg);
+            color: white;
+            width: 30px;
+            height: 30px;
+            border-radius: 50%;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            font-weight: bold;
+        }
+
+        .info-title {
+            font-size: 16px;
+            font-weight: bold;
+            margin: 0;
+        }
+
+        .path-display {
+            background: #f8f9fa;
+            padding: 12px 15px;
+            border-radius: 6px;
+            border-left: 4px solid var(--node-selected-bg);
+            font-size: 14px;
+            color: #333;
+            margin-bottom: 12px;
+            min-height: 50px;
+        }
+
+        .path-group-title {
+            font-weight: bold;
+            margin-bottom: 5px;
+            display: flex;
+            align-items: center;
+            gap: 6px;
+        }
+
+        .path-display-grid {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 15px;
+        }
+
+        .network-tag {
+            background: #fff;
+            border: 1px solid #ced4da;
+            padding: 3px 8px;
+            border-radius: 4px;
+            font-weight: bold;
+            font-size: 13px;
+        }
+
+        textarea.strategy-desc {
+            width: 100%;
+            height: 100px;
+            padding: 10px;
+            border: 1px solid var(--border-color);
+            border-radius: 6px;
+            font-size: 14px;
+            -webkit-user-select: auto;
+            user-select: auto;
+        }
+    </style>
+</head>
+<body>
+
+<!-- PWA Install Banner -->
+<div id="installBanner" style="display:none; position:fixed; bottom:0; left:0; right:0; background:#2c3e50; color:white; padding:12px 20px; align-items:center; justify-content:space-between; z-index:9999; box-shadow:0 -2px 12px rgba(0,0,0,0.3); gap:12px;">
+  <div style="display:flex; align-items:center; gap:10px; font-size:14px;">
+    <span style="font-size:22px;">📲</span>
+    <div>
+      <div style="font-weight:bold;">安裝策略矩陣工具</div>
+      <div style="font-size:12px; opacity:0.8;">加入主畫面，隨時離線使用</div>
+    </div>
+  </div>
+  <div style="display:flex; gap:8px; flex-shrink:0;">
+    <button id="installBtn" style="background:#f1c40f; color:#2c3e50; border:none; padding:8px 16px; border-radius:6px; font-weight:bold; cursor:pointer; font-size:13px;">立即安裝</button>
+    <button id="dismissBtn" style="background:transparent; color:white; border:1px solid rgba(255,255,255,0.4); padding:8px 12px; border-radius:6px; cursor:pointer; font-size:13px;">略過</button>
+  </div>
+</div>
+
+<div class="container">
+    <header>
+        <div class="emba-title">國立東華大學EMBA 高階經營管理碩士班</div>
+        <h1>策略矩陣線上工具 V8.0</h1>
+    </header>
+
+    <div class="instruction-panel">
+        <div class="info-title-box">
+            <div class="target-icon" style="background: #1f618d;">💡</div>
+            <h2 class="info-title" style="color: #1f618d;">策略矩陣線上工具使用說明</h2>
+        </div>
+        <div class="instruction-grid">
+            <div class="instruction-step">
+                <strong>📝 自行修改第一欄文字</strong>
+                表格最上方的第一欄表頭（包含各項「價值鏈活動」與「產品線A/B」）文字皆為互動輸入框，您可直接點擊該文字進行修改，定義專屬於您的企業分析項目。
+            </div>
+            <div class="instruction-step">
+                <strong>⚙️ 彈性調整欄位配置</strong>
+                利用最上方的控制面板，可自由點選增加或減少價值鏈活動的攔位數量（無上限），或加減調整 1~3 行的產品分析欄位，系統會自動重新計算與完美對齊。
+            </div>
+            <div class="instruction-step">
+                <strong>🔗 佈署策略傳導連線</strong>
+                滑鼠點擊矩陣中的任一方塊（呈現黃色閃爍），再點擊另一個方塊，即可自動繪製出带有箭頭的策略傳導指向線；若對同一配對再次點擊，則可取消連線。
+            </div>
+            <div class="instruction-step">
+                <strong>📊 自動彙整與輔助紀錄</strong>
+                已部署的線路代碼會即時生成並顯示在下方圖譜區，右側面板更提供平行對齊的六大構面定義作為參考，最後可在核心說明欄位鍵入您的綜效分析論述。
+            </div>
+        </div>
+    </div>
+
+    <div class="control-panel">
+        <div class="control-group">
+            <label>價值鏈活動：</label>
+            <button onclick="changeValueChainCount(-1)">➖ 減少一欄</button>
+            <button onclick="changeValueChainCount(1)">➕ 增加一欄</button>
+        </div>
+
+        <div class="control-group product-group">
+            <label style="color: var(--product-color);">產品欄位 (1~3)：</label>
+            <button onclick="changeProductCount(-1)">➖ 減少產品</button>
+            <button onclick="changeProductCount(1)">➕ 增加產品</button>
+        </div>
+
+        <button class="btn-danger" style="margin-left: auto;" onclick="clearNetwork()">清除所有策略連線</button>
+    </div>
+
+    <div class="matrix-layout">
+        <div class="matrix-table-container" id="matrixTableContainer">
+            <svg class="svg-canvas" id="matrixSvg"></svg>
+            <table class="matrix-table" id="matrixTable">
+                <thead>
+                    <tr id="headerRow">
+                        <th class="axis-label">構面</th>
+                    </tr>
+                </thead>
+                <tbody id="matrixBody">
+                </tbody>
+            </table>
+        </div>
+
+        <div class="dimension-side-panel">
+            <div class="side-panel-header">
+                <div class="side-panel-title">策略形貌六大構面</div>
+            </div>
+            <div class="side-panel-body">
+                <div class="dimension-item"><strong>A. 產品線的廣度與特色</strong><span>產品或服務多元、獨特性。</span></div>
+                <div class="dimension-item"><strong>B. 目標市場的區隔與選擇</strong><span>核心客戶群、特定消費者需求。</span></div>
+                <div class="dimension-item"><strong>C. 垂直整合的程度</strong><span>對產業上游與下游控制比例。</span></div>
+                <div class="dimension-item"><strong>D. 相對規模與成長速度</strong><span>產能規模、市場佔有率目標。</span></div>
+                <div class="dimension-item"><strong>E. 地理領域的範圍</strong><span>經營的空間分布與佈局。</span></div>
+                <div class="dimension-item"><strong>F. 競爭武器與核心能力</strong><span>壓制對手、贏得客戶關鍵優勢。</span></div>
+            </div>
+        </div>
+    </div>
+
+    <div class="info-panel">
+        <div class="info-title-box">
+            <div class="target-icon">🎯</div>
+            <h2 class="info-title">當前策略傳導路徑圖譜</h2>
+        </div>
+        
+        <div class="path-display">
+            <div class="path-group-title" style="color: var(--path-single-color);">🔹 已部署的策略指向線路：</div>
+            <div class="path-display-grid" id="singleLinesContainer">--</div>
+        </div>
+
+        <textarea class="strategy-desc" placeholder="請在此輸入對此現行策略形貌的具體核心說明..."></textarea>
+    </div>
+</div>
+
+<script>
+    let valueChainActivities = ["原料採購", "配方設計", "各階加工", "品質管制", "行銷通路"];
+    let productColumns = ["產品線A", "產品線B"]; 
+
+    const dimensions = ['A', 'B', 'C', 'D', 'E', 'F'];
+    const productPrefixes = ['G', 'H', 'I']; 
+
+    let networkConnections = []; 
+    let activeSourceNode = null;
+
+    function initMatrix() {
+        renderHeaders();
+        renderRows();
+        drawLines();
+        updatePathDisplay();
+        
+        window.removeEventListener('resize', drawLines);
+        window.addEventListener('resize', drawLines);
+        
+        const container = document.getElementById('matrixTableContainer');
+        if (container) {
+            container.removeEventListener('scroll', drawLines);
+            container.addEventListener('scroll', drawLines);
+        }
+    }
+
+    function changeValueChainCount(delta) {
+        if (delta < 0 && valueChainActivities.length <= 1) return;
+        if (delta > 0) {
+            valueChainActivities.push(`新活動欄位 ${valueChainActivities.length + 1}`);
+        } else {
+            valueChainActivities.pop();
+        }
+        validateNetwork();
+        initMatrix();
+    }
+
+    function changeProductCount(delta) {
+        let newCount = productColumns.length + delta;
+        if (newCount < 1 || newCount > 3) return;
+
+        if (delta > 0) {
+            productColumns.push(`產品線 ${String.fromCharCode(65 + productColumns.length)}`);
+        } else {
+            productColumns.pop();
+        }
+        validateNetwork();
+        initMatrix();
+    }
+
+    function validateNetwork() {
+        let validNodes = [];
+        dimensions.forEach((d, dIdx) => {
+            const numStr = String(dIdx + 1).padStart(2, '0');
+            valueChainActivities.forEach((_, i) => validNodes.push(`${d}${String(i+1).padStart(2, '0')}`));
+            productColumns.forEach((_, i) => {
+                const prefix = productPrefixes[i];
+                validNodes.push(`${d}${prefix}${numStr}`); 
+            });
+        });
+        
+        networkConnections = networkConnections.filter(pair => {
+            let parts = pair.split('->');
+            return validNodes.includes(parts[0]) && validNodes.includes(parts[1]);
+        });
+        if (!validNodes.includes(activeSourceNode)) activeSourceNode = null;
+    }
+
+    function renderHeaders() {
+        const headerRow = document.getElementById('headerRow');
+        headerRow.innerHTML = '<th class="axis-label">構面</th>';
+        
+        valueChainActivities.forEach((activity, index) => {
+            const th = document.createElement('th');
+            th.innerHTML = `
+                <div class="v-header-cell">
+                    <input type="text" value="${activity}" onchange="valueChainActivities[${index}]=this.value;">
+                </div>
+            `;
+            headerRow.appendChild(th);
+        });
+
+        const dividerTh = document.createElement('th');
+        dividerTh.className = 'divider-cell';
+        headerRow.appendChild(dividerTh);
+
+        productColumns.forEach((prod, index) => {
+            const th = document.createElement('th');
+            th.className = 'product-header';
+            th.innerHTML = `
+                <div class="v-header-cell" style="color: var(--product-color);">
+                    <input type="text" value="${prod}" style="color: var(--product-color); border-bottom-color: #e67e22;" onchange="productColumns[${index}]=this.value;">
+                </div>
+            `;
+            headerRow.appendChild(th);
+        });
+    }
+
+    function renderRows() {
+        const matrixBody = document.getElementById('matrixBody');
+        matrixBody.innerHTML = '';
+
+        let connectedNodes = new Set();
+        networkConnections.forEach(pair => {
+            let parts = pair.split('->');
+            connectedNodes.add(parts[0]);
+            connectedNodes.add(parts[1]);
+        });
+
+        dimensions.forEach((dim, dIdx) => {
+            const row = document.createElement('tr');
+            const numStr = String(dIdx + 1).padStart(2, '0'); 
+            
+            const firstCell = document.createElement('td');
+            firstCell.className = 'axis-label';
+            firstCell.innerText = dim;
+            row.appendChild(firstCell);
+
+            valueChainActivities.forEach((_, index) => {
+                const vNumStr = String(index + 1).padStart(2, '0');
+                const cellId = `${dim}${vNumStr}`;
+                const td = document.createElement('td');
+                
+                const node = document.createElement('div');
+                node.className = 'cell-node';
+                node.id = `node-${cellId}`;
+                node.innerText = cellId;
+                
+                if (connectedNodes.has(cellId)) node.classList.add('connected');
+                if (activeSourceNode === cellId) node.classList.add('active-source');
+                
+                node.onclick = () => handleNetworkNodeClick(cellId);
+                td.appendChild(node);
+                row.appendChild(td);
+            });
+
+            const dividerTd = document.createElement('td');
+            dividerTd.className = 'divider-cell';
+            row.appendChild(dividerTd);
+
+            productColumns.forEach((_, index) => {
+                const prefix = productPrefixes[index]; 
+                const cellId = `${dim}${prefix}${numStr}`; 
+                const displayId = `${dim}${prefix}${numStr}`; 
+                const td = document.createElement('td');
+                
+                const node = document.createElement('div');
+                node.className = 'cell-node product-node';
+                node.id = `node-${cellId}`;
+                node.innerText = displayId; 
+                
+                if (connectedNodes.has(cellId)) node.classList.add('connected');
+                if (activeSourceNode === cellId) node.classList.add('active-source');
+                
+                node.onclick = () => handleNetworkNodeClick(cellId);
+                td.appendChild(node);
+                row.appendChild(td);
+            });
+
+            matrixBody.appendChild(row);
+        });
+    }
+
+    function handleNetworkNodeClick(cellId) {
+        if (activeSourceNode === null) {
+            activeSourceNode = cellId;
+            renderRows();
+        } else {
+            if (activeSourceNode === cellId) {
+                activeSourceNode = null;
+                renderRows();
+            } else {
+                const targetPair = `${activeSourceNode}->${cellId}`;
+                const existIndex = networkConnections.indexOf(targetPair);
+                
+                if (existIndex > -1) {
+                    networkConnections.splice(existIndex, 1);
+                } else {
+                    networkConnections.push(targetPair);
+                }
+                activeSourceNode = null;
+                
+                renderRows();
+                drawLines();
+                updatePathDisplay();
+            }
+        }
+    }
+
+    function updatePathDisplay() {
+        const singleContainer = document.getElementById('singleLinesContainer');
+        let html = '';
+
+        function formatCode(c) {
+            if (c.length >= 4 && (c.includes('G') || c.includes('H') || c.includes('I'))) {
+                return `${c.charAt(0)}-${c.substring(1)}`;
+            }
+            return c;
+        }
+
+        networkConnections.forEach(pair => {
+            let parts = pair.split('->');
+            html += `<span class="network-tag">${formatCode(parts[0])} ➔ ${formatCode(parts[1])}</span>`;
+        });
+
+        singleContainer.innerHTML = html || '<span style="color:#999; font-style:italic;">暫無策略傳導線路</span>';
+    }
+
+    function clearNetwork() {
+        networkConnections = [];
+        activeSourceNode = null;
+        renderRows();
+        drawLines();
+        updatePathDisplay();
+    }
+
+    function drawLines() {
+        const svg = document.getElementById('matrixSvg');
+        const container = document.getElementById('matrixTableContainer');
+        if (!svg || !container) return;
+        
+        svg.innerHTML = '';
+        if (networkConnections.length === 0) return;
+        
+        const defs = document.createElementNS('http://www.w3.org/2000/svg', 'defs');
+        const markerEndBlue = document.createElementNS('http://www.w3.org/2000/svg', 'marker');
+        markerEndBlue.setAttribute('id', 'arrow-end-blue');
+        markerEndBlue.setAttribute('viewBox', '0 0 10 10');
+        markerEndBlue.setAttribute('refX', '9'); markerEndBlue.setAttribute('refY', '5');
+        markerEndBlue.setAttribute('markerWidth', '6'); markerEndBlue.setAttribute('markerHeight', '6');
+        markerEndBlue.setAttribute('orient', 'auto-start-reverse');
+        const p1 = document.createElementNS('http://www.w3.org/2000/svg', 'path');
+        p1.setAttribute('d', 'M 0 1.5 L 9 5 L 0 8.5 z'); p1.setAttribute('fill', 'var(--path-single-color)');
+        markerEndBlue.appendChild(p1); defs.appendChild(markerEndBlue);
+        svg.appendChild(defs);
+
+        const containerRect = container.getBoundingClientRect();
+
+        networkConnections.forEach(pair => {
+            let parts = pair.split('->');
+            const fromId = parts[0];
+            const toId = parts[1];
+            
+            const fromNode = document.getElementById(`node-${fromId}`);
+            const toNode = document.getElementById(`node-${toId}`);
+            if (!fromNode || !toNode) return;
+
+            const fromRect = fromNode.getBoundingClientRect();
+            const toRect = toNode.getBoundingClientRect();
+
+            let x1_raw = fromRect.left - containerRect.left + (fromRect.width / 2) + container.scrollLeft;
+            let y1_raw = fromRect.top - containerRect.top + (fromRect.height / 2);
+            let x2_raw = toRect.left - containerRect.left + (toRect.width / 2) + container.scrollLeft;
+            let y2_raw = toRect.top - containerRect.top + (toRect.height / 2);
+
+            const reversePair = `${toId}->${fromId}`;
+            const hasReverse = networkConnections.includes(reversePair);
+
+            if (hasReverse) {
+                const dx_raw = x2_raw - x1_raw;
+                const dy_raw = y2_raw - y1_raw;
+                const len_raw = Math.sqrt(dx_raw * dx_raw + dy_raw * dy_raw);
+                if (len_raw > 0) {
+                    const nx = -dy_raw / len_raw;
+                    const ny = dx_raw / len_raw;
+                    const shift = 7;
+                    x1_raw += nx * shift;
+                    y1_raw += ny * shift;
+                    x2_raw += nx * shift;
+                    y2_raw += ny * shift;
+                }
+            }
+
+            const dx = x2_raw - x1_raw;
+            const dy = y2_raw - y1_raw;
+            const distance = Math.sqrt(dx * dx + dy * dy);
+            const offset = 38; 
+
+            let x1 = x1_raw, y1 = y1_raw, x2 = x2_raw, y2 = y2_raw;
+            if (distance > offset * 2) {
+                x1 = x1_raw + (dx / distance) * offset;
+                y1 = y1_raw + (dy / distance) * offset;
+                x2 = x2_raw - (dx / distance) * offset;
+                y2 = y2_raw - (dy / distance) * offset;
+            }
+
+            const controlOffset = Math.abs(x2 - x1) * 0.5;
+            const cp1x = x1 + (x2 > x1 ? controlOffset : -controlOffset);
+            const cp1y = y1;
+            const cp2x = x2 - (x2 > x1 ? controlOffset : -controlOffset);
+            const cp2y = y2;
+
+            const pathData = `M ${x1} ${y1} C ${cp1x} ${cp1y}, ${cp2x} ${cp2y}, ${x2} ${y2}`;
+
+            const pathElement = document.createElementNS('http://www.w3.org/2000/svg', 'path');
+            pathElement.setAttribute('d', pathData);
+            pathElement.setAttribute('class', 'strategy-path');
+            pathElement.setAttribute('marker-end', 'url(#arrow-end-blue)');
+
+            svg.appendChild(pathElement);
+        });
+    }
+
+    // PWA: Service Worker registration
+    if ('serviceWorker' in navigator) {
+      window.addEventListener('load', () => {
+        navigator.serviceWorker.register('./sw.js').catch(() => {});
+      });
+    }
+
+    // PWA: Install prompt
+    let deferredPrompt = null;
+    const installBanner = document.getElementById('installBanner');
+    const installBtn = document.getElementById('installBtn');
+    const dismissBtn = document.getElementById('dismissBtn');
+
+    window.addEventListener('beforeinstallprompt', e => {
+      e.preventDefault();
+      deferredPrompt = e;
+      installBanner.style.display = 'flex';
+    });
+
+    if (installBtn) {
+      installBtn.addEventListener('click', async () => {
+        if (!deferredPrompt) return;
+        deferredPrompt.prompt();
+        const { outcome } = await deferredPrompt.userChoice;
+        deferredPrompt = null;
+        installBanner.style.display = 'none';
+      });
+    }
+    if (dismissBtn) {
+      dismissBtn.addEventListener('click', () => {
+        installBanner.style.display = 'none';
+      });
+    }
+
+    window.addEventListener('appinstalled', () => {
+      installBanner.style.display = 'none';
+    });
+
+    window.onload = () => {
+        initMatrix();
+        
+        networkConnections = [
+            "A01->B01",
+            "B01->A01", 
+            "B01->B02",
+            "B02->B03",
+            "B03->CG03", 
+            "CG03->CH03" 
+        ];
+        
+        renderRows();
+        setTimeout(drawLines, 200);
+        updatePathDisplay();
+    };
+</script>
+</body>
+</html>
