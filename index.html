@@ -1,10 +1,15 @@
 <!DOCTYPE html>
+<!-- =========================================================================
+     🏆 kok1232乃爸致敬東華大學管理學院EMBA教授們!! 🏆     
+          
+     更新時間：2026-06-17 08:54
+     ========================================================================= -->
 <html lang="zh-TW">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     
-    <meta name="description" content="國立東華大學 EMBA 高階經營管理碩士班專用之策略矩陣線上工具 V8.0。專為高階策略管理課程設計，協助快速梳理核心能力與價值活動維度。感謝蔣哥與 Betty 老師指導。">
+    <meta name="description" content="國立東華大學 EMBA 高階經營管理碩士班專用之策略矩陣線上工具 V8.7。專為高階策略管理課程設計，協助快速梳理核心能力與價值活動維度。感謝蔣哥與 Betty 老師指導。">
     <meta name="keywords" content="策略矩陣, 策略矩陣線上工具, 高階策略管理, 東華EMBA, 蔣哥, Betty老師">
 
     <meta name="geo.region" content="TW" />
@@ -19,7 +24,7 @@
     <meta name="apple-mobile-web-app-title" content="策略矩陣">
     <link rel="apple-touch-icon" href="icons/icon-192x192.png">
     <meta name="theme-color" content="#2c3e50">
-    <title>國立東華大學EMBA 高階經營管理碩士班 - 策略矩陣線上工具 V8.0</title>
+    <title>國立東華大學EMBA 高階經營管理碩士班 - 策略矩陣線上工具 V8.7</title>
     <style>
         :root {
             --primary-color: #2c3e50;
@@ -82,7 +87,6 @@
             font-size: 24px;
         }
 
-        /* 移至上方的使用說明區塊樣式 */
         .instruction-panel {
             background: #fdfefe;
             border: 1px solid #d4e6f1;
@@ -194,7 +198,7 @@
             width: 100%;
             height: 100%;
             pointer-events: none;
-            z-index: 10;
+            z-index: 3; 
         }
 
         table.matrix-table {
@@ -203,11 +207,8 @@
             table-layout: fixed;
             position: relative;
             z-index: 2;
+            background: transparent;
         }
-
-        table.matrix-table tr:first-child th { border-top: none; }
-        table.matrix-table tr:last-child td { border-bottom: none; }
-        table.matrix-table tr td:first-child, table.matrix-table tr th:first-child { border-left: none; }
 
         table.matrix-table th, table.matrix-table td {
             border: 1px solid var(--border-color);
@@ -221,6 +222,8 @@
             font-weight: bold;
             font-size: 14px;
             height: 74px; 
+            position: relative;
+            z-index: 6; 
         }
 
         table.matrix-table th.axis-label, table.matrix-table td.axis-label {
@@ -228,6 +231,8 @@
             color: var(--primary-color);
             width: 50px;
             font-weight: bold;
+            position: relative;
+            z-index: 6;
         }
 
         table.matrix-table th.divider-cell, table.matrix-table td.divider-cell {
@@ -255,14 +260,6 @@
             font-weight: bold;
             color: var(--primary-color);
             border-bottom: 1px dashed #999;
-            -webkit-user-select: auto;
-            user-select: auto;
-        }
-        .v-header-cell input:focus {
-            border: 1px solid #495057;
-            background: white;
-            outline: none;
-            border-radius: 4px;
         }
 
         table.matrix-table th.product-header {
@@ -280,15 +277,15 @@
             width: 70px; 
             height: 42px;
             border-radius: 6px;
-            background-color: #fff;
+            background-color: #fff; 
             border: 1px solid #adb5bd;
             font-size: 12px;
             font-weight: bold;
-            color: #495057;
+            color: #495077;
             cursor: pointer;
-            transition: all 0.15s;
+            transition: all 0.15s ease;
             position: relative;
-            z-index: 5;
+            z-index: 5; 
         }
 
         .cell-node.product-node {
@@ -296,7 +293,7 @@
             color: #d35400;
         }
 
-        .cell-node.connected {
+        .cell-node.connected, .cell-node.bidirectional-connected {
             background-color: var(--node-selected-bg) !important;
             color: white !important;
             border-color: var(--node-selected-bg) !important;
@@ -321,6 +318,8 @@
             background: #fafafa;
             display: flex;
             flex-direction: column;
+            position: relative;
+            z-index: 6;
         }
 
         .side-panel-header {
@@ -361,15 +360,6 @@
             justify-content: center; 
             align-items: center;    
             text-align: center;     
-            transition: background-color 0.2s;
-        }
-
-        .dimension-item:hover {
-            background-color: #fffbf5; 
-        }
-
-        .dimension-item:last-child {
-            border-bottom: none; 
         }
 
         .dimension-item strong {
@@ -389,12 +379,21 @@
             font-weight: 500;
         }
 
+        @keyframes flowDash {
+            to { stroke-dashoffset: -30; }
+        }
+
         .strategy-path {
             fill: none;
-            stroke-width: 3.5;
-            stroke: var(--path-single-color);
-            stroke-dasharray: 6 4;
+            stroke-width: 3;
+            stroke-dasharray: 8 5;
+            animation: flowDash 0.8s linear infinite;
+            transition: stroke-width 0.15s ease, stroke-dasharray 0.15s ease, stroke 0.15s ease, filter 0.15s ease;
         }
+
+        .strategy-path.single { stroke: var(--path-single-color); }
+        .strategy-path.bidirectional { stroke: #e67e22; }
+        .strategy-path.merged { stroke: #27ae60; }
 
         .info-panel {
             background: #fff;
@@ -454,13 +453,32 @@
         }
 
         .network-tag {
-            background: #fff;
-            border: 1px solid #ced4da;
-            padding: 3px 8px;
-            border-radius: 4px;
+            padding: 6px 14px;
+            border-radius: 20px; 
             font-weight: bold;
             font-size: 13px;
+            color: white;
+            background: var(--node-selected-bg); 
+            box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+            display: inline-flex;
+            align-items: center;
+            text-shadow: 0 1px 1px rgba(0,0,0,0.2);
+            border: 1px solid #511477;
+            cursor: pointer;
+            transition: all 0.2s ease;
         }
+
+        .network-tag::before {
+            content: "";
+            display: inline-block;
+            width: 8px;
+            height: 8px;
+            border-radius: 50%;
+            margin-right: 8px;
+        }
+        .network-tag.tag-blue::before { background: var(--path-single-color); }
+        .network-tag.tag-orange::before { background: #e67e22; }
+        .network-tag.tag-green::before { background: #27ae60; }
 
         textarea.strategy-desc {
             width: 100%;
@@ -476,7 +494,6 @@
 </head>
 <body>
 
-<!-- PWA Install Banner -->
 <div id="installBanner" style="display:none; position:fixed; bottom:0; left:0; right:0; background:#2c3e50; color:white; padding:12px 20px; align-items:center; justify-content:space-between; z-index:9999; box-shadow:0 -2px 12px rgba(0,0,0,0.3); gap:12px;">
   <div style="display:flex; align-items:center; gap:10px; font-size:14px;">
     <span style="font-size:22px;">📲</span>
@@ -494,7 +511,7 @@
 <div class="container">
     <header>
         <div class="emba-title">國立東華大學EMBA 高階經營管理碩士班</div>
-        <h1>策略矩陣線上工具 V8.0</h1>
+        <h1>策略矩陣線上工具 V8.7</h1>
     </header>
 
     <div class="instruction-panel">
@@ -505,15 +522,15 @@
         <div class="instruction-grid">
             <div class="instruction-step">
                 <strong>📝 自行修改第一欄文字</strong>
-                表格最上方的第一欄表頭（包含各項「價值鏈活動」與「產品線A/B」）文字皆為互動輸入框，您可直接點擊該文字進行修改，定義專屬於您的企業分析項目。
+                表格最上方的第一欄表頭（包含各項「價值鏈活動」與「產品線A/B」）文字皆為互動輸入框，您可直接點擊該文字進行修改，定義專專屬於您的企業分析項目。
             </div>
             <div class="instruction-step">
                 <strong>⚙️ 彈性調整欄位配置</strong>
-                利用最上方的控制面板，可自由點選增加或減少價值鏈活動的攔位數量（無上限），或加減調整 1~3 行的產品分析欄位，系統會自動重新計算與完美對齊。
+                利用最上方的控制面板，可自由點選增加或減少價值鏈活動的欄位數量（無上限），或加減調整 1~3 行的產品分析欄位，系統會自動重新計算與完美對齊。
             </div>
             <div class="instruction-step">
                 <strong>🔗 佈署策略傳導連線</strong>
-                滑鼠點擊矩陣中的任一方塊（呈現黃色閃爍），再點擊另一個方塊，即可自動繪製出带有箭頭的策略傳導指向線；若對同一配對再次點擊，則可取消連線。
+                滑鼠點擊矩陣中的任一方塊（呈現黃色閃爍），再點擊另一個方塊，即可自動繪製出帶有箭頭的策略傳導指向線；若對同一配對再次點擊，則可取消連線。
             </div>
             <div class="instruction-step">
                 <strong>📊 自動彙整與輔助紀錄</strong>
@@ -574,7 +591,14 @@
         </div>
         
         <div class="path-display">
-            <div class="path-group-title" style="color: var(--path-single-color);">🔹 已部署的策略指向線路：</div>
+            <div class="path-group-title" style="color: var(--path-single-color);">
+                🔹 已部署的策略指向線路：
+                <span style="margin-left:16px; font-weight:normal; font-size:12px; display:inline-flex; gap:14px; align-items:center;">
+                    <span><span style="display:inline-block;width:28px;height:3px;background:#1e88e5;border-radius:2px;vertical-align:middle;margin-right:4px;"></span>單向</span>
+                    <span><span style="display:inline-block;width:28px;height:3px;background:#e67e22;border-radius:2px;vertical-align:middle;margin-right:4px;"></span>雙向互指</span>
+                    <span><span style="display:inline-block;width:28px;height:3px;background:#27ae60;border-radius:2px;vertical-align:middle;margin-right:4px;"></span>多源匯聚</span>
+                </span>
+            </div>
             <div class="path-display-grid" id="singleLinesContainer">--</div>
         </div>
 
@@ -680,6 +704,19 @@
         });
     }
 
+    function getMergeTargets() {
+        let targetCount = {};
+        networkConnections.forEach(pair => {
+            const [, t] = pair.split('->');
+            targetCount[t] = (targetCount[t] || 0) + 1;
+        });
+        return new Set(
+            Object.entries(targetCount)
+                  .filter(([, cnt]) => cnt >= 2)
+                  .map(([id]) => id)
+        );
+    }
+
     function renderRows() {
         const matrixBody = document.getElementById('matrixBody');
         matrixBody.innerHTML = '';
@@ -710,10 +747,15 @@
                 node.id = `node-${cellId}`;
                 node.innerText = cellId;
                 
-                if (connectedNodes.has(cellId)) node.classList.add('connected');
+                if (connectedNodes.has(cellId)) {
+                    node.classList.add('connected');
+                }
                 if (activeSourceNode === cellId) node.classList.add('active-source');
                 
                 node.onclick = () => handleNetworkNodeClick(cellId);
+                node.onmouseenter = () => highlightNodeConnections(cellId, true);
+                node.onmouseleave = () => highlightNodeConnections(cellId, false);
+                
                 td.appendChild(node);
                 row.appendChild(td);
             });
@@ -733,10 +775,15 @@
                 node.id = `node-${cellId}`;
                 node.innerText = displayId; 
                 
-                if (connectedNodes.has(cellId)) node.classList.add('connected');
+                if (connectedNodes.has(cellId)) {
+                    node.classList.add('connected');
+                }
                 if (activeSourceNode === cellId) node.classList.add('active-source');
                 
                 node.onclick = () => handleNetworkNodeClick(cellId);
+                node.onmouseenter = () => highlightNodeConnections(cellId, true);
+                node.onmouseleave = () => highlightNodeConnections(cellId, false);
+                
                 td.appendChild(node);
                 row.appendChild(td);
             });
@@ -774,6 +821,7 @@
     function updatePathDisplay() {
         const singleContainer = document.getElementById('singleLinesContainer');
         let html = '';
+        const mergeTargets = getMergeTargets();
 
         function formatCode(c) {
             if (c.length >= 4 && (c.includes('G') || c.includes('H') || c.includes('I'))) {
@@ -784,10 +832,55 @@
 
         networkConnections.forEach(pair => {
             let parts = pair.split('->');
-            html += `<span class="network-tag">${formatCode(parts[0])} ➔ ${formatCode(parts[1])}</span>`;
+            let tagColorClass = 'tag-blue'; 
+            
+            if (networkConnections.includes(`${parts[1]}->${parts[0]}`)) {
+                tagColorClass = 'tag-orange'; 
+            } else if (mergeTargets.has(parts[1])) {
+                tagColorClass = 'tag-green'; 
+            }
+            
+            html += `<span id="tag-${pair}" class="network-tag ${tagColorClass}" 
+                           onmouseenter="highlightPath('${pair}', true)" 
+                           onmouseleave="highlightPath('${pair}', false)">
+                        ${formatCode(parts[0])} ➔ ${formatCode(parts[1])}
+                     </span>`;
         });
 
         singleContainer.innerHTML = html || '<span style="color:#999; font-style:italic;">暫無策略傳導線路</span>';
+    }
+
+    function highlightPath(pair, isHighlight) {
+        const path = document.getElementById('path-' + pair);
+        if (path) {
+            if (isHighlight) {
+                path.style.strokeWidth = '6';
+                path.style.strokeDasharray = 'none'; 
+                path.style.filter = 'drop-shadow(0px 0px 5px rgba(0,0,0,0.4))';
+            } else {
+                path.style.strokeWidth = '3';
+                path.style.strokeDasharray = '8 5'; 
+                path.style.filter = 'none';
+            }
+        }
+    }
+
+    function highlightNodeConnections(cellId, isHighlight) {
+        networkConnections.forEach(pair => {
+            if (pair.split('->')[0] === cellId || pair.split('->')[1] === cellId) {
+                highlightPath(pair, isHighlight);
+                const tag = document.getElementById('tag-' + pair);
+                if (tag) {
+                    if (isHighlight) {
+                        tag.style.transform = 'scale(1.1) translateY(-2px)';
+                        tag.style.boxShadow = '0 5px 12px rgba(106,27,154,0.4)';
+                    } else {
+                        tag.style.transform = 'none';
+                        tag.style.boxShadow = '0 2px 5px rgba(0,0,0,0.1)';
+                    }
+                }
+            }
+        });
     }
 
     function clearNetwork() {
@@ -798,101 +891,188 @@
         updatePathDisplay();
     }
 
+    function getGutterRoutedPath(x1, y1, x2, y2, colWidth, r) {
+        const dx = x2 - x1;
+        const dy = y2 - y1;
+        const rowHeight = 76;
+        const NW = 35; 
+        const NH = 21; 
+        
+        let points = [];
+        const isAdjacentX = Math.abs(dx) > 0 && Math.abs(dx) < colWidth + 10;
+        const isAdjacentY = Math.abs(dy) > 0 && Math.abs(dy) < rowHeight + 10;
+        
+        if (Math.abs(dy) < 5 && isAdjacentX) {
+            points = [{x: x1, y: y1}, {x: x2, y: y2}];
+        } 
+        else if (Math.abs(dx) < 5 && isAdjacentY) {
+            points = [{x: x1, y: y1}, {x: x2, y: y2}];
+        } 
+        else if (Math.abs(dy) < 5) {
+            const yGutter = y1 + 38; 
+            points = [{x: x1, y: y1}, {x: x1, y: yGutter}, {x: x2, y: yGutter}, {x: x2, y: y2}];
+        } 
+        else if (Math.abs(dx) < 5) {
+            const xGutter = x1 + colWidth / 2; 
+            points = [{x: x1, y: y1}, {x: xGutter, y: y1}, {x: xGutter, y: y2}, {x: x2, y: y2}];
+        } 
+        else {
+            const yGutter = y1 + Math.sign(dy) * 38;               
+            const xGutter = x2 - Math.sign(dx) * (colWidth / 2);   
+            points = [
+                {x: x1, y: y1},
+                {x: x1, y: yGutter},
+                {x: xGutter, y: yGutter},
+                {x: xGutter, y: y2},
+                {x: x2, y: y2}
+            ];
+        }
+
+        function trimToBorder(cx, cy, tx, ty) {
+            const ex = tx - cx, ey = ty - cy;
+            if (ex === 0 && ey === 0) return { x: cx, y: cy };
+            const tR = ex > 0 ?  (NW + 2) / ex : Infinity;
+            const tL = ex < 0 ? -(NW + 2) / ex : Infinity;
+            const tB = ey > 0 ?  (NH + 2) / ey : Infinity;
+            const tT = ey < 0 ? -(NH + 2) / ey : Infinity;
+            const t  = Math.min(tR, tL, tB, tT);
+            return { x: cx + ex * t, y: cy + ey * t };
+        }
+        
+        points[0] = trimToBorder(x1, y1, points[1].x, points[1].y);
+        points[points.length - 1] = trimToBorder(x2, y2, points[points.length - 2].x, points[points.length - 2].y);
+        
+        return buildSvgPathWithRadius(points, r);
+    }
+
+    function buildSvgPathWithRadius(points, r) {
+        if (points.length === 0) return '';
+        let d = `M ${points[0].x} ${points[0].y}`;
+        
+        for (let i = 1; i < points.length - 1; i++) {
+            const pPrev = points[i - 1];
+            const pCurr = points[i];
+            const pNext = points[i + 1];
+            
+            const d1x = Math.sign(pPrev.x - pCurr.x);
+            const d1y = Math.sign(pPrev.y - pCurr.y);
+            const d2x = Math.sign(pNext.x - pCurr.x);
+            const d2y = Math.sign(pNext.y - pCurr.y);
+            
+            const len1 = Math.max(Math.abs(pPrev.x - pCurr.x), Math.abs(pPrev.y - pCurr.y));
+            const len2 = Math.max(Math.abs(pNext.x - pCurr.x), Math.abs(pNext.y - pCurr.y));
+            let actualR = Math.min(r, len1 / 2, len2 / 2);
+            
+            const preX = pCurr.x + d1x * actualR;
+            const preY = pCurr.y + d1y * actualR;
+            const postX = pCurr.x + d2x * actualR;
+            const postY = pCurr.y + d2y * actualR;
+            
+            d += ` L ${preX} ${preY} Q ${pCurr.x} ${pCurr.y} ${postX} ${postY}`;
+        }
+        
+        d += ` L ${points[points.length - 1].x} ${points[points.length - 1].y}`;
+        return d;
+    }
+
     function drawLines() {
         const svg = document.getElementById('matrixSvg');
         const container = document.getElementById('matrixTableContainer');
         if (!svg || !container) return;
-        
+
         svg.innerHTML = '';
         if (networkConnections.length === 0) return;
-        
+
         const defs = document.createElementNS('http://www.w3.org/2000/svg', 'defs');
-        const markerEndBlue = document.createElementNS('http://www.w3.org/2000/svg', 'marker');
-        markerEndBlue.setAttribute('id', 'arrow-end-blue');
-        markerEndBlue.setAttribute('viewBox', '0 0 10 10');
-        markerEndBlue.setAttribute('refX', '9'); markerEndBlue.setAttribute('refY', '5');
-        markerEndBlue.setAttribute('markerWidth', '6'); markerEndBlue.setAttribute('markerHeight', '6');
-        markerEndBlue.setAttribute('orient', 'auto-start-reverse');
-        const p1 = document.createElementNS('http://www.w3.org/2000/svg', 'path');
-        p1.setAttribute('d', 'M 0 1.5 L 9 5 L 0 8.5 z'); p1.setAttribute('fill', 'var(--path-single-color)');
-        markerEndBlue.appendChild(p1); defs.appendChild(markerEndBlue);
+        function makeArrow(id, color) {
+            const m = document.createElementNS('http://www.w3.org/2000/svg', 'marker');
+            m.setAttribute('id', id);
+            m.setAttribute('viewBox', '0 0 10 10');
+            m.setAttribute('refX', '9'); m.setAttribute('refY', '5');
+            m.setAttribute('markerWidth', '5'); m.setAttribute('markerHeight', '5');
+            m.setAttribute('orient', 'auto-start-reverse');
+            const p = document.createElementNS('http://www.w3.org/2000/svg', 'path');
+            p.setAttribute('d', 'M 0 1.5 L 9 5 L 0 8.5 z');
+            p.setAttribute('fill', color);
+            m.appendChild(p);
+            return m;
+        }
+        defs.appendChild(makeArrow('arrow-blue',   '#1e88e5'));
+        defs.appendChild(makeArrow('arrow-orange',  '#e67e22'));
+        defs.appendChild(makeArrow('arrow-green',   '#27ae60'));
         svg.appendChild(defs);
 
         const containerRect = container.getBoundingClientRect();
 
+        const n1 = nodeCenter('A01'), n2 = nodeCenter('A02');
+        const colWidth = (n1 && n2) ? Math.abs(n2.x - n1.x) : 120;
+
+        function nodeCenter(nodeId) {
+            const el = document.getElementById('node-' + nodeId);
+            if (!el) return null;
+            const r = el.getBoundingClientRect();
+            return {
+                x: r.left - containerRect.left + r.width  / 2 + container.scrollLeft,
+                y: r.top  - containerRect.top  + r.height / 2
+            };
+        }
+
+        function drawPathElement(id, d, cls, arrowId) {
+            const el = document.createElementNS('http://www.w3.org/2000/svg', 'path');
+            el.setAttribute('id', 'path-' + id);
+            el.setAttribute('d', d);
+            el.setAttribute('class', 'strategy-path' + (cls ? ' ' + cls : ''));
+            if (arrowId) el.setAttribute('marker-end', 'url(#' + arrowId + ')');
+            svg.appendChild(el);
+        }
+
+        const mergeTargets = getMergeTargets();
+
         networkConnections.forEach(pair => {
-            let parts = pair.split('->');
-            const fromId = parts[0];
-            const toId = parts[1];
-            
-            const fromNode = document.getElementById(`node-${fromId}`);
-            const toNode = document.getElementById(`node-${toId}`);
-            if (!fromNode || !toNode) return;
+            const [fromId, toId] = pair.split('->');
+            const fromC = nodeCenter(fromId);
+            const toC   = nodeCenter(toId);
+            if (!fromC || !toC) return;
 
-            const fromRect = fromNode.getBoundingClientRect();
-            const toRect = toNode.getBoundingClientRect();
+            const isMerge  = mergeTargets.has(toId);
+            const isBiDir  = networkConnections.includes(`${toId}->${fromId}`);
 
-            let x1_raw = fromRect.left - containerRect.left + (fromRect.width / 2) + container.scrollLeft;
-            let y1_raw = fromRect.top - containerRect.top + (fromRect.height / 2);
-            let x2_raw = toRect.left - containerRect.left + (toRect.width / 2) + container.scrollLeft;
-            let y2_raw = toRect.top - containerRect.top + (toRect.height / 2);
+            let x1 = fromC.x, y1 = fromC.y, x2 = toC.x, y2 = toC.y;
 
-            const reversePair = `${toId}->${fromId}`;
-            const hasReverse = networkConnections.includes(reversePair);
-
-            if (hasReverse) {
-                const dx_raw = x2_raw - x1_raw;
-                const dy_raw = y2_raw - y1_raw;
-                const len_raw = Math.sqrt(dx_raw * dx_raw + dy_raw * dy_raw);
-                if (len_raw > 0) {
-                    const nx = -dy_raw / len_raw;
-                    const ny = dx_raw / len_raw;
-                    const shift = 7;
-                    x1_raw += nx * shift;
-                    y1_raw += ny * shift;
-                    x2_raw += nx * shift;
-                    y2_raw += ny * shift;
+            if (isBiDir) {
+                const myIdx  = networkConnections.indexOf(pair);
+                const revIdx = networkConnections.indexOf(`${toId}->${fromId}`);
+                const biShift = myIdx < revIdx ? 1 : -1;
+                
+                if (Math.abs(y2 - y1) < 5) { 
+                    y1 += biShift * 6; y2 += biShift * 6;
+                } else if (Math.abs(x2 - x1) < 5) { 
+                    x1 += biShift * 6; x2 += biShift * 6;
+                } else { 
+                    y1 += biShift * 6; x2 += biShift * 6;
                 }
             }
 
-            const dx = x2_raw - x1_raw;
-            const dy = y2_raw - y1_raw;
-            const distance = Math.sqrt(dx * dx + dy * dy);
-            const offset = 38; 
+            let cls = 'single';
+            let arrow = 'arrow-blue';
 
-            let x1 = x1_raw, y1 = y1_raw, x2 = x2_raw, y2 = y2_raw;
-            if (distance > offset * 2) {
-                x1 = x1_raw + (dx / distance) * offset;
-                y1 = y1_raw + (dy / distance) * offset;
-                x2 = x2_raw - (dx / distance) * offset;
-                y2 = y2_raw - (dy / distance) * offset;
+            if (isBiDir) {
+                cls = 'bidirectional'; arrow = 'arrow-orange';
+            } else if (isMerge) {
+                cls = 'merged'; arrow = 'arrow-green';
             }
 
-            const controlOffset = Math.abs(x2 - x1) * 0.5;
-            const cp1x = x1 + (x2 > x1 ? controlOffset : -controlOffset);
-            const cp1y = y1;
-            const cp2x = x2 - (x2 > x1 ? controlOffset : -controlOffset);
-            const cp2y = y2;
-
-            const pathData = `M ${x1} ${y1} C ${cp1x} ${cp1y}, ${cp2x} ${cp2y}, ${x2} ${y2}`;
-
-            const pathElement = document.createElementNS('http://www.w3.org/2000/svg', 'path');
-            pathElement.setAttribute('d', pathData);
-            pathElement.setAttribute('class', 'strategy-path');
-            pathElement.setAttribute('marker-end', 'url(#arrow-end-blue)');
-
-            svg.appendChild(pathElement);
+            const d = getGutterRoutedPath(x1, y1, x2, y2, colWidth, 10);
+            drawPathElement(pair, d, cls, arrow);
         });
     }
 
-    // PWA: Service Worker registration
     if ('serviceWorker' in navigator) {
       window.addEventListener('load', () => {
         navigator.serviceWorker.register('./sw.js').catch(() => {});
       });
     }
 
-    // PWA: Install prompt
     let deferredPrompt = null;
     const installBanner = document.getElementById('installBanner');
     const installBtn = document.getElementById('installBtn');
@@ -919,20 +1099,15 @@
       });
     }
 
-    window.addEventListener('appinstalled', () => {
-      installBanner.style.display = 'none';
-    });
-
     window.onload = () => {
         initMatrix();
         
         networkConnections = [
-            "A01->B01",
-            "B01->A01", 
-            "B01->B02",
-            "B02->B03",
-            "B03->CG03", 
-            "CG03->CH03" 
+            "A01->A02", "B01->A02", "C01->A02", 
+            "A02->A03", "A03->A02",             
+            "B02->A02", "B02->B03",             
+            "B03->C03",                         
+            "A03->A04", "A04->A05", "A05->AG01" 
         ];
         
         renderRows();
